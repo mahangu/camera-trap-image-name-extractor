@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "camera-trap-image-name-extractor"
+version = "0.1.0"
+description = "Extract metadata from camera trap image directories"
+requires-python = ">=3.6"
+dependencies = [
+    "pandas",
+    "tqdm",
+]
+
+[project.scripts]
+camera-trap-image-name-extractor = "camera_trap_image_name_extractor:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/camera_trap_image_name_extractor"]
