@@ -30,6 +30,16 @@ def get_output_filename(base_filename: str) -> Path:
     suffix = Path(base_filename).suffix
     return Path(f"{name}_{timestamp}{suffix}")
 
+def extract_camera_number(file_path: Path) -> str:
+    """Extract camera number from the directory structure.
+    The camera number is typically in the directory two levels up from the images."""
+    try:
+        # Go up two directories from the image file to get to the camera directory
+        camera_dir = file_path.parent.parent.parent
+        return camera_dir.name
+    except Exception:
+        return "unknown"
+
 def process_directory(input_dir: Path, output_file: Path):
     if not input_dir.exists():
         print(f"Error: Input directory does not exist: {input_dir}")
@@ -37,7 +47,7 @@ def process_directory(input_dir: Path, output_file: Path):
         
     output_file = output_file.parent / get_output_filename(output_file.name)
     output_file.parent.mkdir(parents=True, exist_ok=True)
-    df = pd.DataFrame(columns=['Image ID', 'Location', 'Species', 'Count'])
+    df = pd.DataFrame(columns=['Image ID', 'Location', 'Camera', 'Species', 'Count'])
     
     total_files = sum(1 for _ in input_dir.rglob('*') 
                      if _.is_file() and not _.name.startswith('.') 
@@ -55,10 +65,12 @@ def process_directory(input_dir: Path, output_file: Path):
                     species = file_path.parent.parent.name if file_path.parent.parent else "unknown"
                     count = file_path.parent.name
                     image_id = format_image_id(file_path, camera_id)
+                    camera = extract_camera_number(file_path)
                     
                     df.loc[len(df)] = {
                         'Image ID': image_id,
                         'Location': str(rel_path.parent),
+                        'Camera': camera,
                         'Species': species,
                         'Count': count
                     }
